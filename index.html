@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Velocity Vortex</title>
+  <title>Velocity Jumper</title>
   <style>
     body {
       margin: 0;
@@ -77,26 +77,6 @@
       bottom: 10px;
       font-size: 14px;
       color: #bbb;
-      font-weight: bold;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-    .footerBox {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #d3d3d3; /* Light Grey for light theme */
-      color: black;
-      padding: 10px 20px;
-      border-radius: 20px;
-      width: fit-content;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      font-size: 12px;
-    }
-    .dark-theme .footerBox {
-      background-color: rgba(75, 0, 130, 0.85); /* Dark Translucent Indigo for dark theme */
-      color: white;
     }
     .themeToggle {
       position: absolute;
@@ -121,11 +101,24 @@
       background-color: #f4f6f8;
       color: #333;
     }
+    .boostMeter {
+      margin-top: 10px;
+      width: 100%;
+      background-color: #333;
+      height: 10px;
+      border-radius: 5px;
+    }
+    .boostFill {
+      height: 100%;
+      background-color: #00d2d3;
+      width: 0%;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body class="dark-theme">
   <button class="themeToggle" onclick="toggleTheme()">Switch to Light Mode</button>
-  <h1>Velocity Vortex</h1>
+  <h1>Velocity Jumper</h1>
   <div id="startScreen">
     <label for="difficulty">Select Difficulty:</label>
     <select id="difficulty">
@@ -141,6 +134,9 @@
   <canvas id="gameCanvas" width="600" height="200"></canvas>
   <div id="score">Score: 0</div>
   <div id="highScore">High Score: 0</div>
+  <div id="boostMeter" class="boostMeter">
+    <div id="boostFill" class="boostFill"></div>
+  </div>
 
   <div id="gameOverScreen">
     <h2>Game Over!</h2>
@@ -155,13 +151,181 @@
   </div>
 
   <footer>
-    <div class="footerBox">
-      © 2025 Made by Akshit Dagar. All rights reserved.
-    </div>
-  </footer>
+  <strong>© 2025 Made by Akshit Dagar. All rights reserved.</strong>
+</footer>
 
   <script>
-    // The rest of the game code will be here (as per your existing code)
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startScreen = document.getElementById('startScreen');
+    const scoreDisplay = document.getElementById('score');
+    const highScoreDisplay = document.getElementById('highScore');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const finalScore = document.getElementById('finalScore');
+    const boostMeter = document.getElementById('boostMeter');
+    const boostFill = document.getElementById('boostFill');
+    const boostScreen = document.getElementById('boostScreen');
+    const difficultySelect = document.getElementById('difficulty');
+    const themeToggle = document.querySelector('.themeToggle');
+
+    let dino = { x: 50, y: 150, radius: 20, velocityY: 0, gravity: 1.5, jumping: false };
+    let cactus = { x: 600, y: 160, width: 20, height: 40, speed: 6 };
+    let baseSpeed = 6;
+    let score = 0;
+    let gameOver = false;
+    let gameStarted = false;
+    let highScore = localStorage.getItem('highScore') || 0;
+    let boost = 0; // Boost meter starts at 0
+
+    highScoreDisplay.innerText = 'High Score: ' + highScore;
+
+    function drawDino() {
+      ctx.fillStyle = '#FF4F5A';
+      ctx.beginPath();
+      ctx.arc(dino.x + dino.radius, dino.y + dino.radius, dino.radius, 0, Math.PI * 2, false);
+      ctx.fill();
+    }
+
+    function drawCactus() {
+      ctx.fillStyle = '#8A2BE2'; // Purple Blue for obstacles
+      ctx.fillRect(cactus.x, cactus.y, cactus.width, cactus.height);
+    }
+
+    function updateBoostMeter() {
+      boostFill.style.width = (boost * 2) + '%'; // Max boost is 50, so it fills at 2% per jump
+    }
+
+    function useBoost() {
+      if (boost >= 50) {
+        gameStarted = false;
+        boostScreen.style.display = 'flex';
+
+        setTimeout(() => {
+          cactus.x += 200; // Skip 10 obstacles
+          boost = 0; // Reset boost
+          updateBoostMeter();
+          score += 25; // Add 25 points to score when boost is used
+          scoreDisplay.innerText = 'Score: ' + score;
+
+          setTimeout(() => {
+            boostScreen.style.display = 'none';
+            gameStarted = true;
+            update();
+          }, 1000);
+        }, 500); // Delay for cutscene
+      }
+    }
+
+    function update() {
+      if (!gameStarted || gameOver) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      dino.velocityY += dino.gravity;
+      dino.y += dino.velocityY;
+
+      if (dino.y > 150) {
+        dino.y = 150;
+        dino.velocityY = 0;
+        dino.jumping = false;
+        boost++; // Increase boost on every jump
+        updateBoostMeter(); // Update boost meter
+      }
+
+      cactus.x -= cactus.speed;
+      if (cactus.x < -cactus.width) {
+        cactus.x = canvas.width;
+        score++;
+        scoreDisplay.innerText = 'Score: ' + score;
+
+        if (score > 100) {
+          cactus.y = Math.random() < 0.5 ? 160 : 40; // Obstacles will now appear from top after score 100
+        }
+      }
+
+      if (
+        dino.x < cactus.x + cactus.width &&
+        dino.x + dino.radius * 2 > cactus.x &&
+        dino.y < cactus.y + cactus.height &&
+        dino.y + dino.radius * 2 > cactus.y
+      ) {
+        gameOver = true;
+        finalScore.innerText = 'Your score was: ' + score;
+
+        if (score > highScore) {
+          highScore = score;
+          localStorage.setItem('highScore', highScore);
+          highScoreDisplay.innerText = 'High Score: ' + highScore;
+        }
+
+        gameOverScreen.style.display = 'flex';
+        return;
+      }
+
+      drawDino();
+      drawCactus();
+
+      requestAnimationFrame(update);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !dino.jumping && gameStarted && !gameOver) {
+        dino.velocityY = -20;
+        dino.jumping = true;
+      }
+
+      if (e.code === 'KeyR' && gameStarted && boost >= 50) {
+        useBoost(); // Use boost when pressing 'R'
+      }
+
+      if (e.key === 'Tab') {
+        if (gameOver) {
+          restartGame();
+        } else {
+          const difficultyOptions = difficultySelect.querySelectorAll('option');
+          const currentIndex = Array.from(difficultyOptions).findIndex(option => option.selected);
+          const nextIndex = (currentIndex + 1) % difficultyOptions.length;
+          difficultyOptions[currentIndex].selected = false;
+          difficultyOptions[nextIndex].selected = true;
+        }
+      }
+    });
+
+    function startGame() {
+      const difficulty = difficultySelect.value;
+      baseSpeed = 6;
+      switch (difficulty) {
+        case 'easy': cactus.speed = baseSpeed; break;
+        case 'normal': cactus.speed = baseSpeed * 1.35; break;
+        case 'hard': cactus.speed = baseSpeed * 1.7; break;
+        case 'extreme': cactus.speed = baseSpeed * 1.99; break;
+        case 'impossible': cactus.speed = baseSpeed * 3.54; break;
+      }
+      startScreen.style.display = 'none';
+      canvas.style.display = 'block';
+      scoreDisplay.style.display = 'block';
+      highScoreDisplay.style.display = 'block';
+      gameStarted = true;
+      update();
+    }
+
+    function restartGame() {
+      gameOver = false;
+      gameStarted = true;
+      score = 0;
+      dino.y = 150;
+      dino.velocityY = 0;
+      cactus.x = canvas.width;
+      gameOverScreen.style.display = 'none';
+      scoreDisplay.innerText = 'Score: 0';
+      update();
+    }
+
+    function continueGame() {
+      boostScreen.style.display = 'none';
+      gameStarted = true;
+      update();
+    }
 
     function toggleTheme() {
       const body = document.body;
