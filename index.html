@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velocity Vortex</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 2em;
+      color: #00d2d3;
+      transition: all 0.3s ease;
+    }
+    canvas {
+      background: #23234c;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      display: none;
+    }
+    #score, #highScore {
+      margin-top: 10px;
+      font-size: 18px;
+      display: none;
+    }
+    #highScore {
+      font-size: 16px;
+      color: #bbb;
+    }
+    #startScreen, #gameOverScreen, #boostScreen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #gameOverScreen, #boostScreen {
+      display: none;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(0,0,0,0.85);
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    button, select {
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      margin-top: 15px;
+    }
+    select {
+      background-color: #23234c;
+      color: #fff;
+      box-shadow: none;
+      border: 1px solid #4e73df;
+    }
+    button:hover {
+      background-color: #2e59d9;
+    }
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 14px;
+      color: #bbb;
+      font-weight: bold;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .footerBox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #d3d3d3; /* Light Grey for light theme */
+      color: black;
+      padding: 10px 20px;
+      border-radius: 20px;
+      width: fit-content;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      font-size: 12px;
+    }
+    .dark-theme .footerBox {
+      background-color: rgba(75, 0, 130, 0.85); /* Dark Translucent Indigo for dark theme */
+      color: white;
+    }
+    .themeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px;
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .themeToggle:hover {
+      background-color: #2e59d9;
+    }
+    .dark-theme {
+      background-color: #1e1e2f;
+      color: #fff;
+    }
+    .light-theme {
+      background-color: #f4f6f8;
+      color: #333;
+    }
+  </style>
+</head>
+<body class="dark-theme">
+  <button class="themeToggle" onclick="toggleTheme()">Switch to Light Mode</button>
+  <h1>Velocity Vortex</h1>
+  <div id="startScreen">
+    <label for="difficulty">Select Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="normal" selected>Normal</option>
+      <option value="hard">Hard</option>
+      <option value="extreme">Extreme</option>
+      <option value="impossible">Impossible</option>
+    </select>
+    <button onclick="startGame()">Play</button>
+  </div>
+
+  <canvas id="gameCanvas" width="600" height="200"></canvas>
+  <div id="score">Score: 0</div>
+  <div id="highScore">High Score: 0</div>
+
+  <div id="gameOverScreen">
+    <h2>Game Over!</h2>
+    <p id="finalScore"></p>
+    <button onclick="restartGame()">Restart</button>
+  </div>
+
+  <div id="boostScreen">
+    <h2>Boost Activated!</h2>
+    <p>Jump ahead 10 obstacles!</p>
+    <button onclick="continueGame()">Continue Game</button>
+  </div>
+
+  <footer>
+    <div class="footerBox">
+      © 2025 Made by Akshit Dagar. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // The rest of the game code will be here (as per your existing code)
+
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.contains('dark-theme');
+      body.classList.toggle('dark-theme', !isDark);
+      body.classList.toggle('light-theme', isDark);
+      themeToggle.textContent = isDark ? 'Switch to Dark Mode' : 'Switch to Light Mode';
+    }
+  </script>
+</body>
+</html>
